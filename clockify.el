@@ -100,8 +100,7 @@
           (elt now 1) (string-to-number (elt split 1))
           (elt now 0) 0)
     (format-time-string "%Y-%m-%dT%TZ"
-                        (apply #'encode-time
-                         (decode-time (apply #'encode-time now) "UTC")))))
+                        (encode-time now) "UTC")))
 
 (provide 'clockify)
 ;;; clockify.el ends here
