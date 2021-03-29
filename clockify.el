@@ -51,6 +51,7 @@
     response))
 
 (defun clockify-get-projects ()
+  (interactive)
   (setq clockify-projects (clockify-api "GET" (concat "/workspaces/" clockify-workspace "/projects")))
   (setq clockify-project-client
         (mapcar (lambda (project)
@@ -61,7 +62,6 @@
                 clockify-projects)))
 
 (defun clockify-clock (selected-project start-time end-time)
-  (clockify-get-projects)
   (interactive
    (list (completing-read
           "Choose clockify project: "
