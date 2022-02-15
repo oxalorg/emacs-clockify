@@ -49,7 +49,6 @@
                                 ("X-Api-Key" . ,clockify-api-key))
                      :sync t))))
     response))
-
 (defun clockify-get-projects ()
   (interactive)
   (setq clockify-projects (clockify-api "GET" (concat "/workspaces/" clockify-workspace "/projects")))
@@ -90,6 +89,41 @@
                     (cons "start" start-utc)
                     (cons "end" end-utc)
                     (cons "projectId" pid)))))
+
+(defun clockify-clock-start (selected-project )
+  (interactive
+   (list (completing-read
+          "Choose clockify project: "
+          (mapcar (lambda (project)
+                    (concat
+                     (nth 2 project)
+                     " - "
+                     (nth 0 project)
+                     " / "
+                     (nth 1 project)))
+                  clockify-project-client))
+         ))
+    (clockify-api "POST" (concat "/workspaces/" clockify-workspace "/time-entries")
+                  (list
+                    (cons "start" (shell-command-to-string "echo -n (date -d '-1 hour' +%Y-%m-%dT%TZ)" ))
+                ;;    (cons "end" end-utc)
+                  (cons "projectId" (car (split-string selected-project "\s"))))))
+
+(defun clockify-clock-stop ()
+        (interactive)
+      (clockify-api "PATCH" (concat "/workspaces/" clockify-workspace "/user/" clockify-user-id "/time-entries")
+;                    (cons "start" start-utc)
+                    (list (cons  "end"  (shell-command-to-string "echo -n (date -d '-1 hour' +%Y-%m-%dT%TZ)" ))))
+
+                  )
+
+
+
+
+
+
+
+
 
 (defun get-iso-utc-for-clock-time (time)
   (let ((split (split-string time "[\s:]"))

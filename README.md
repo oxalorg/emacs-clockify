@@ -11,6 +11,7 @@ Add this to your config file
   :load-path "~/projects/emacs-clockify"
   :init
   (setq clockify-api-key "<api-key>")
+  (setq clockify-user-id "<user-id>")
   (setq clockify-workspace "<workspace-id>")
 )
 
@@ -23,6 +24,8 @@ You need to clone this repo to the path you mention in the `:load-path` as this 
 In any emacs session use `M-X` and call the `clockify-get-projects` once to populate all the projects from your workspace.
 
 Then run `clockify-clock` whenever you want to clock in a time entry. It will show a nice popup where you can search for your project, search for start time, and end time. Really quick!
+
+To start tracking for a project arbitrarily, run  `M-X clockify-clock-start` and select the project. To end it, run `M-X clockify-clock-stop`
 
 ## TODO
 
