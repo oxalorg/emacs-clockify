@@ -82,10 +82,9 @@
           "Choose clockify project: "
           (mapcar (lambda (project)
                     (concat
-                     (nth 2 project)
-                     " - "
+                     "["
                      (nth 0 project)
-                     " / "
+                     "] "
                      (nth 1 project)))
                   clockify-project-client))
          (completing-read "Start time (hh:mm:ss):" clockify-times nil t)
