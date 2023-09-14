@@ -15,6 +15,14 @@ Add this to your config file
   (setq clockify-workspace "<workspace-id>")
 )
 
+;; or to not check the secrets in, you can create a file called 
+;; secrets.el
+(setq clockify-api-key "<api-key>")
+(setq clockify-user-id "<user-id>")
+(setq clockify-workspace "<workspace-id>")
+
+;; then load it in your init.el
+(load-file "./secrets.el")
 ```
 
 You need to clone this repo to the path you mention in the `:load-path` as this package is not yet available on MELPA.
