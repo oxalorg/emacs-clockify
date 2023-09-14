@@ -80,15 +80,14 @@
         (entry (format-time-string "%Y-%m-%dT%TZ" (current-time)))
         (start-utc (get-iso-utc-for-clock-time start-time))
         (end-utc (get-iso-utc-for-clock-time end-time)))
-    (message "Here")
     (message pid)
     (message start-utc)
     (message end-utc)
     (clockify-api "POST" (concat "/workspaces/" clockify-workspace "/time-entries")
                   (list
-                    (cons "start" start-utc)
-                    (cons "end" end-utc)
-                    (cons "projectId" pid)))))
+                   (cons "start" start-utc)
+                   (cons "end" end-utc)
+                   (cons "projectId" pid)))))
 
 (defun clockify-clock-start (selected-project )
   (interactive
@@ -103,27 +102,17 @@
                      (nth 1 project)))
                   clockify-project-client))
          ))
-    (clockify-api "POST" (concat "/workspaces/" clockify-workspace "/time-entries")
-                  (list
-                    (cons "start" (shell-command-to-string "echo -n (date -d '-1 hour' +%Y-%m-%dT%TZ)" ))
-                ;;    (cons "end" end-utc)
-                  (cons "projectId" (car (split-string selected-project "\s"))))))
+  (clockify-api "POST" (concat "/workspaces/" clockify-workspace "/time-entries")
+                (list
+                 (cons "start" (shell-command-to-string "echo -n (date -d '-1 hour' +%Y-%m-%dT%TZ)" ))
+                 ;;    (cons "end" end-utc)
+                 (cons "projectId" (car (split-string selected-project "\s"))))))
 
 (defun clockify-clock-stop ()
-        (interactive)
-      (clockify-api "PATCH" (concat "/workspaces/" clockify-workspace "/user/" clockify-user-id "/time-entries")
-;                    (cons "start" start-utc)
-                    (list (cons  "end"  (shell-command-to-string "echo -n (date -d '-1 hour' +%Y-%m-%dT%TZ)" ))))
-
-                  )
-
-
-
-
-
-
-
-
+  (interactive)
+  (clockify-api "PATCH" (concat "/workspaces/" clockify-workspace "/user/" clockify-user-id "/time-entries")
+                ;; (cons "start" start-utc)
+                (list (cons  "end"  (shell-command-to-string "echo -n (date -d '-1 hour' +%Y-%m-%dT%TZ)" )))))
 
 (defun get-iso-utc-for-clock-time (time)
   (let ((split (split-string time "[\s:]"))
