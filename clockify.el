@@ -39,15 +39,19 @@
                        "10:30 PM" "11:30 AM" "11:30 PM" "12:30 AM" "12:30 PM"))
 
 (defun clockify-api (method path &optional data)
-  (let ((response (request-response-data
-                   (request
-                     (concat "https://api.clockify.me/api/v1" path)
-                     :type method
-                     :data (json-encode data)
-                     :parser 'json-read
-                     :headers `(("Content-Type" . "application/json")
-                                ("X-Api-Key" . ,clockify-api-key))
-                     :sync t))))
+  (let* ((req (request
+                (concat "https://api.clockify.me/api/v1" path)
+                :type method
+                :data (json-encode data)
+                :parser 'json-read
+                :error
+                (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                               (message "Got error: %S" error-thrown)))
+                :headers `(("Content-Type" . "application/json")
+                           ("X-Api-Key" . ,clockify-api-key))
+                :sync t))
+         response (request-response-data req))
+    (message (request-response-error-thrown req))
     response))
 
 (defun clockify-get-projects ()
@@ -76,7 +80,7 @@
                 clockify-projects))
   (message "Done. Fetched all clockify data."))
 
-(defun clockify-clock (selected-project start-time end-time)
+(defun clockify-clock (selected-project start-time end-time description)
   (interactive
    (list (completing-read
           "Choose clockify project: "
@@ -85,12 +89,14 @@
                      "["
                      (nth 0 project)
                      "] "
-                     (nth 1 project)))
+                     (nth 1 project)
+                     " -- "
+                     (nth 2 project)))
                   clockify-project-client))
          (completing-read "Start time (hh:mm:ss):" clockify-times nil t)
-         (completing-read "End time (hh:mm:ss):" clockify-times nil t)))
-
-  (let ((pid (car (split-string selected-project "\s")))
+         (completing-read "End time (hh:mm:ss):" clockify-times nil t)
+         (read-string "Description: " "")))
+  (let ((pid (car (last (split-string selected-project "\s"))))
         (now (decode-time))
         (entry (format-time-string "%Y-%m-%dT%TZ" (current-time)))
         (start-utc (get-iso-utc-for-clock-time start-time))
@@ -98,10 +104,12 @@
     (message pid)
     (message start-utc)
     (message end-utc)
+    (message description)
     (clockify-api "POST" (concat "/workspaces/" clockify-workspace "/time-entries")
                   (list
                    (cons "start" start-utc)
                    (cons "end" end-utc)
+                   (cons "description" description)
                    (cons "projectId" pid)))))
 
 (defun clockify-clock-start (selected-project )
