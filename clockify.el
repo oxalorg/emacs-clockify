@@ -26,6 +26,7 @@
 (defvar clockify-workspace)
 (defvar clockify-projects "")
 (defvar clockify-project-client "")
+(defvar clockify-cache-file (expand-file-name "~/.clockify-cache.el"))
 
 (setq clockify-times '("00:00 AM" "01:00 AM" "01:00 PM" "02:00 AM" "02:00 PM"
                        "03:00 AM" "03:00 PM" "04:00 AM" "04:00 PM" "05:00 AM"
@@ -37,6 +38,22 @@
                        "05:30 PM" "06:30 AM" "06:30 PM" "07:30 AM" "07:30 PM"
                        "08:30 AM" "08:30 PM" "09:30 AM" "09:30 PM" "10:30 AM"
                        "10:30 PM" "11:30 AM" "11:30 PM" "12:30 AM" "12:30 PM"))
+
+(defun clockify-save-cache ()
+  "Save clockify projects data to cache file."
+  (with-temp-file clockify-cache-file
+    (prin1 (list :projects clockify-projects
+                 :project-client clockify-project-client)
+           (current-buffer))))
+
+(defun clockify-load-cache ()
+  "Load clockify projects data from cache file."
+  (when (file-exists-p clockify-cache-file)
+    (with-temp-buffer
+      (insert-file-contents clockify-cache-file)
+      (let ((data (read (current-buffer))))
+        (setq clockify-projects (plist-get data :projects))
+        (setq clockify-project-client (plist-get data :project-client))))))
 
 (defun clockify-api (method path &optional data)
   (let* ((req (request
@@ -78,7 +95,8 @@
                         (id (cdr (assoc 'id project))))
                     (list clientName name id)))
                 clockify-projects))
-  (message "Done. Fetched all clockify data."))
+  (clockify-save-cache)
+  (message "Done. Fetched all clockify data and saved to cache."))
 
 (defun clockify-clock (selected-project start-time end-time description)
   (interactive
@@ -147,6 +165,9 @@
           (elt now 0) 0)
     (format-time-string "%Y-%m-%dT%TZ"
                         (encode-time now) "UTC")))
+
+;; Load cached data on module initialization
+(clockify-load-cache)
 
 (provide 'clockify)
 ;;; clockify.el ends here
